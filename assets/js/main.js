@@ -979,5 +979,33 @@ if (marginSlider) {
 const savedMargin = getSavedCover().pageMargin;
 if (savedMargin) applyMargin(savedMargin);
 
+function scaleA4Sheets() {
+  if (window.innerWidth > 768) return;
+
+  const available = window.innerWidth - 20; // 10px padding each side
+  const scale = available / 794;
+
+  document
+    .querySelectorAll(".a4-sheet, .a4-sheet-continuous")
+    .forEach((sheet) => {
+      sheet.style.transformOrigin = "top left";
+      sheet.style.transform = `scale(${scale})`;
+      // Collapse the empty space the untransformed element still occupies
+      sheet.style.marginBottom = `${1123 * scale - 1123}px`;
+    });
+}
+
+// Run on load, tab switch, and resize
+scaleA4Sheets();
+window.addEventListener("resize", scaleA4Sheets);
+
+// Also run when the Logbook View tab is clicked
+// (sheets may not exist in DOM until tab is activated)
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setTimeout(scaleA4Sheets, 50); // slight delay for DOM render
+  });
+});
+
 loadCoverSettings();
 initData();
