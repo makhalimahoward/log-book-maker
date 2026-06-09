@@ -980,9 +980,19 @@ const savedMargin = getSavedCover().pageMargin;
 if (savedMargin) applyMargin(savedMargin);
 
 function scaleA4Sheets() {
-  if (window.innerWidth > 768) return;
+  if (window.innerWidth > 768) {
+    // Reset any previously applied mobile scaling
+    document
+      .querySelectorAll(".a4-sheet, .a4-sheet-continuous")
+      .forEach((sheet) => {
+        sheet.style.transform = "";
+        sheet.style.marginBottom = "";
+        sheet.style.transformOrigin = "";
+      });
+    return;
+  }
 
-  const available = window.innerWidth - 20; // 10px padding each side
+  const available = window.innerWidth - 20;
   const scale = available / 794;
 
   document
@@ -990,7 +1000,6 @@ function scaleA4Sheets() {
     .forEach((sheet) => {
       sheet.style.transformOrigin = "top left";
       sheet.style.transform = `scale(${scale})`;
-      // Collapse the empty space the untransformed element still occupies
       sheet.style.marginBottom = `${1123 * scale - 1123}px`;
     });
 }
