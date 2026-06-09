@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Book Maker — Industrial Attachment Workspace</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="app-logo-icon">
+                <i class="ri-article-line"></i>
+            </div>
+            <div class="header-title-group">
+                <h1 class="header-title">Log Book Maker</h1>
+                <p class="header-subtitle">Industrial Attachment Workspace</p>
+            </div>
+        </div>
+        <div class="header-controls">
+            <div class="tab-switcher">
+                <button id="tab-generator" class="tab-btn active">
+                    <i class="ri-dashboard-3-line"></i><span>Dashboard</span>
+                </button>
+                <button id="tab-preview" class="tab-btn">
+                    <i class="ri-profile-line"></i><span>Logbook View</span>
+                </button>
+            </div>
+            <button id="btn-theme-toggle" class="theme-toggle-btn" title="Toggle theme">
+                <i class="ri-moon-fill" id="theme-icon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="app-main">
+
+        <!-- ===== DASHBOARD VIEW ===== -->
+        <div id="view-generator" class="view-panel view-dashboard">
+
+            <!-- Sidebar -->
+            <aside class="app-sidebar">
+
+                <div class="sidebar-section">
+                    <label class="sidebar-label"><i class="ri-search-2-line"></i> Search</label>
+                    <div class="search-wrap">
+                        <i class="ri-search-2-line search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Tasks, clients, dates..." class="search-input">
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <label class="sidebar-label"><i class="ri-calendar-line"></i> Filter by Week</label>
+                    <div class="week-filter-wrap">
+                        <button id="week-filter-btn" class="week-filter-trigger">
+                            <i class="ri-calendar-event-line"></i>
+                            <span id="week-filter-label">All Weeks</span>
+                            <i class="ri-arrow-down-s-line week-filter-arrow"></i>
+                        </button>
+                        <div id="week-filter-popover" class="week-filter-popover hidden">
+                            <div class="week-filter-list" id="week-filter-list"></div>
+                        </div>
+                    </div>
+                    <select id="weekFilter" style="display:none;">
+                        <option value="ALL">All Weeks</option>
+                    </select>
+                </div>
+
+                <div class="sidebar-section">
+                    <label class="sidebar-label"><i class="ri-user-settings-line"></i> Role</label>
+                    <div class="role-pills">
+                        <button class="role-filter-btn active" data-role="ALL">
+                            <span class="role-dot dot-all"></span>All
+                            <span class="count-all role-count">0</span>
+                        </button>
+                        <button class="role-filter-btn" data-role="TECH">
+                            <span class="role-dot dot-tech"></span>Technical
+                            <span class="count-tech role-count">0</span>
+                        </button>
+                        <button class="role-filter-btn" data-role="SUPER">
+                            <span class="role-dot dot-super"></span>Supervision
+                            <span class="count-super role-count">0</span>
+                        </button>
+                        <button class="role-filter-btn" data-role="PM">
+                            <span class="role-dot dot-pm"></span>Product
+                            <span class="count-pm role-count">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-actions">
+                    <button id="btn-show-add" class="action-btn action-primary">
+                        <i class="ri-add-circle-line"></i><span>New Entry</span>
+                    </button>
+                    <button id="btn-download-csv" class="action-btn action-success">
+                        <i class="ri-file-excel-2-fill"></i><span>Export Spreadsheet</span>
+                    </button>
+                    <button id="btn-copy-table" class="action-btn action-ghost">
+                        <i id="icon-copy" class="ri-clipboard-line"></i><span id="text-copy">Copy Records</span>
+                    </button>
+                    <button id="btn-copy-docs" class="action-btn action-docs">
+                        <i class="ri-file-word-line"></i><span>Copy for Docs</span>
+                    </button>
+                    <button id="btn-reset-data" class="action-btn action-danger-ghost">
+                        <i class="ri-restart-line"></i><span>Restore Dataset</span>
+                    </button>
+                </div>
+
+            </aside>
+
+            <!-- Main scroll area -->
+            <div class="logs-scroll-area" id="logs-container-scroll">
+
+                <div class="status-bar">
+                    <div class="status-bar-left">
+                        <span class="status-pulse"></span>
+                        <div>
+                            <span class="status-title">Auto-Save Active</span>
+                            <p class="status-sub">Changes sync to local storage instantly</p>
+                        </div>
+                    </div>
+                    <span class="status-badge">ONLINE</span>
+                </div>
+
+                <!-- ADD / EDIT FORM -->
+                <div id="add-form-container" class="add-form-container is-hidden">
+                    <div class="form-accent-bar"></div>
+                    <div class="form-header">
+                        <h3 class="form-title-label">
+                            <i class="ri-edit-circle-line"></i>
+                            <span id="form-title">Create Custom Log Entry</span>
+                        </h3>
+                        <button id="btn-cancel-add" class="form-discard-btn">Discard</button>
+                    </div>
+                    <form id="log-form" class="log-form">
+                        <input type="hidden" id="edit-id">
+                        <div class="form-grid-3">
+                            <div class="form-field">
+                                <label class="form-label">Date</label>
+                                <input type="text" id="input-date" placeholder="DD/MM/YYYY" required class="form-input">
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Client Enterprise</label>
+                                <input type="text" id="input-client" placeholder="e.g. WearGuard" required
+                                    class="form-input">
+                            </div>
+                            <!-- REPLACE this in the form (the entire role assignment field) -->
+                            <div class="form-field">
+                                <label class="form-label">Role Assignment</label>
+                                <input type="text" id="input-role" class="form-input"
+                                    placeholder="e.g. Technical Support, Backend Dev, PM..." autocomplete="off">
+                            </div>
+                        </div>
+                        <div id="week-hint" class="week-hint hidden">
+                            <i class="ri-calendar-check-line"></i> <span id="week-hint-text"></span>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Work Done / Task Narrative</label>
+                            <textarea id="input-work" rows="3" required
+                                placeholder="Outline task, technical implementation details, configurations..."
+                                class="form-input form-textarea"></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Academic Learnings &amp; Reflections</label>
+                            <textarea id="input-comments" rows="3" required
+                                placeholder="Gained insights, systems logic, professional takeaways..."
+                                class="form-input form-textarea"></textarea>
+                        </div>
+                        <div class="form-footer">
+                            <button type="button" id="btn-cancel-add-bottom" class="form-cancel-btn">Cancel</button>
+                            <button type="submit" class="form-submit-btn">Save Record</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="logs-list" class="logs-list"></div>
+            </div>
+        </div>
+
+        <!-- ===== A4 PREVIEW VIEW ===== -->
+        <div id="view-preview" class="view-panel view-preview hidden">
+
+            <!-- Editor toolbar -->
+            <div id="editor-control-toolbar" class="editor-toolbar no-print">
+                <div class="editor-toolbar-left">
+                    <div class="toolbar-font-group">
+                        <span class="toolbar-label-sm">Font Family:</span>
+                        <!-- select-wrap for custom arrow -->
+                        <div class="select-wrap" style="width:auto;">
+                            <select id="font-selector" class="toolbar-select">
+                                <option value="font-serif-document">Times New Roman (Standard Academic)</option>
+                                <option value="font-sans-document">Arial / Inter (Modern Corporate)</option>
+                                <option value="font-mono-document">Courier Prime (System Monospace)</option>
+                            </select>
+                            <i class="ri-arrow-down-s-line select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="toolbar-divider"></div>
+                    <div class="toolbar-format-btns">
+                        <button onclick="formatText('bold')" class="format-btn" title="Bold"><i
+                                class="ri-bold"></i></button>
+                        <button onclick="formatText('italic')" class="format-btn" title="Italic"><i
+                                class="ri-italic"></i></button>
+                        <button onclick="formatText('underline')" class="format-btn" title="Underline"><i
+                                class="ri-underline"></i></button>
+                        <div class="toolbar-divider-sm"></div>
+                        <button onclick="formatText('insertUnorderedList')" class="format-btn" title="Bullet List"><i
+                                class="ri-list-unordered"></i></button>
+                    </div>
+                </div>
+                <button id="btn-print" class="print-btn">
+                    <i class="ri-printer-fill"></i><span>Export/Print PDF</span>
+                </button>
+            </div>
+
+            <!-- Cover page settings -->
+            <div class="cover-settings-toolbar no-print" id="cover-settings-toolbar">
+                <div class="section-divider">Cover Page Settings</div>
+
+                <div class="toolbar-row">
+                    <div class="upload-col">
+                        <span class="toolbar-label">University Crest</span>
+                        <label class="upload-btn" for="upload-crest">
+                            <img id="crest-thumb" class="preview-thumb hidden-img" src="" alt="crest preview" />
+                            <i id="crest-icon" class="ri-image-add-line upload-icon"></i>
+                            <span id="crest-label">Upload Crest</span>
+                        </label>
+                        <input type="file" id="upload-crest" accept="image/*" style="display:none;" />
+                        <div class="slider-row">
+                            <span class="toolbar-label">Size</span>
+                            <input type="range" id="crest-size-slider" min="60" max="320" value="160"
+                                class="range-input" title="Adjust crest size" />
+                            <span id="crest-size-value" class="range-value">160px</span>
+                        </div>
+                    </div>
+
+                    <div class="upload-col">
+                        <span class="toolbar-label">Company Logo</span>
+                        <label class="upload-btn" for="upload-logo">
+                            <img id="logo-thumb" class="preview-thumb hidden-img" src="" alt="logo preview" />
+                            <i id="logo-icon" class="ri-image-add-line upload-icon"></i>
+                            <span id="logo-label">Upload Logo</span>
+                        </label>
+                        <input type="file" id="upload-logo" accept="image/*" style="display:none;" />
+                    </div>
+
+                    <div class="toolbar-fields-group">
+                        <div class="toolbar-row">
+                            <div class="toolbar-field">
+                                <span class="toolbar-label">Student Name</span>
+                                <input type="text" id="cover-name" class="toolbar-input" placeholder="Full Name" />
+                            </div>
+                            <div class="toolbar-field">
+                                <span class="toolbar-label">Student Number</span>
+                                <input type="text" id="cover-number" class="toolbar-input"
+                                    placeholder="e.g. N0000000X" />
+                            </div>
+                        </div>
+                        <div class="toolbar-row" style="margin-top:12px;">
+                            <div class="toolbar-field">
+                                <span class="toolbar-label">Degree Programme</span>
+                                <input type="text" id="cover-degree" class="toolbar-input"
+                                    placeholder="e.g. B.Sc. Hons Computer Science" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toolbar-row">
+                    <div class="toolbar-field">
+                        <span class="toolbar-label">Industrial Supervisor</span>
+                        <input type="text" id="cover-industrial-sup" class="toolbar-input"
+                            placeholder="Supervisor Name" />
+                    </div>
+                    <div class="toolbar-field">
+                        <span class="toolbar-label">Academic Supervisor</span>
+                        <input type="text" id="cover-academic-sup" class="toolbar-input"
+                            placeholder="Supervisor Name" />
+                    </div>
+                    <div class="toolbar-field">
+                        <span class="toolbar-label">Company Name</span>
+                        <input type="text" id="cover-company" class="toolbar-input"
+                            placeholder="e.g. Company Pvt Ltd" />
+                    </div>
+                    <div class="toolbar-field">
+                        <span class="toolbar-label">Company Location</span>
+                        <input type="text" id="cover-location" class="toolbar-input"
+                            placeholder="e.g. Bulawayo, Zimbabwe" />
+                    </div>
+                    <div class="toolbar-field toolbar-field-wide">
+                        <span class="toolbar-label">Signature Section</span>
+                        <!-- select-wrap for custom arrow -->
+                        <div class="select-wrap">
+                            <select id="signature-mode" class="toolbar-input">
+                                <option value="last">End of Logbook Only</option>
+                                <option value="every">Every Page</option>
+                                <option value="none">None</option>
+                            </select>
+                            <i class="ri-arrow-down-s-line select-arrow"></i>
+                        </div>
+                    </div>
+                    <div class="toolbar-field toolbar-field-wide">
+                        <span class="toolbar-label">Page Margin</span>
+                        <div class="slider-row">
+                            <input type="range" id="margin-slider" min="40" max="160" value="60" class="range-input" />
+                            <span id="margin-value" class="range-value">55px</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Print canvas -->
+            <div id="print-canvas" class="font-serif-document print-canvas">
+
+                <!-- COVER PAGE -->
+                <div class="a4-sheet cover-page">
+                    <div class="cover-top">
+                        <div id="crest-container" class="cover-crest-wrap">
+                            <img id="cover-crest-img" src="" alt="University Crest"
+                                class="cover-crest-img hidden-img" />
+                            <div id="cover-crest-placeholder" class="cover-crest-placeholder">
+                                <i class="ri-image-line"></i>
+                            </div>
+                        </div>
+                        <p class="cover-faculty">Faculty of Applied Science</p>
+                        <p class="cover-dept"><strong>Department of Computer Science</strong></p>
+                    </div>
+
+                    <div class="cover-spacer"></div>
+
+                    <div class="cover-title-block">
+                        <h1 class="cover-title">Industrial Attachment Log Book</h1>
+                    </div>
+
+                    <div class="cover-spacer"></div>
+
+                    <div class="cover-details-table-wrap">
+                        <table class="cover-details-table">
+                            <tr>
+                                <td class="cover-detail-label">Name:</td>
+                                <td class="cover-detail-value" id="cover-display-name">User Moyo</td>
+                            </tr>
+                            <tr>
+                                <td class="cover-detail-label">Student Number:</td>
+                                <td class="cover-detail-value" id="cover-display-number">N0211304R</td>
+                            </tr>
+                            <tr>
+                                <td class="cover-detail-label">Degree Programme:</td>
+                                <td class="cover-detail-value" id="cover-display-degree">B.Sc. Hons in Computer Science
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cover-detail-label">Industrial Supervisor:</td>
+                                <td class="cover-detail-value" id="cover-display-industrial">Juiceworld Chikuruwo</td>
+                            </tr>
+                            <tr>
+                                <td class="cover-detail-label">Academic Supervisor:</td>
+                                <td class="cover-detail-value" id="cover-display-academic">Namatirai Marabada</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="cover-spacer"></div>
+
+                    <div class="cover-submission-statement">
+                        <p><strong style="text-transform:uppercase;">An attachment report submitted in partial
+                                fulfillment of the requirements for the<br>
+                                <strong style="text-transform:none;">Bachelor of Science Honours Degree in Computer
+                                    Science</strong></strong></p>
+                    </div>
+
+                    <div class="cover-spacer"></div>
+
+                    <div class="cover-bottom">
+                        <p class="cover-based-at">Based on Experience at:</p>
+                        <img id="cover-logo-img" src="" alt="Company Logo" class="cover-logo-img hidden-img" />
+                        <div id="cover-logo-placeholder">
+                            <p id="cover-display-company" class="cover-company-name">Company Private Limited</p>
+                        </div>
+                        <p id="cover-display-location" class="cover-location">Bulawayo, Zimbabwe</p>
+                    </div>
+                </div>
+
+                <div id="dynamic-pages-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="app-footer no-print">
+        <i class="ri-code-s-slash-line" style="font-size:12px;"></i>
+        <span>Developed by</span>
+        <a href="https://howardmakhalima.pages.dev" target="_blank" rel="noopener noreferrer">Howard Makhalima</a>
+        <span class="footer-dot"></span>
+        <span>Open Source</span>
+        <span class="footer-dot"></span>
+        <a href="https://howardmakhalima.pages.dev" target="_blank" rel="noopener noreferrer">
+            <i class="ri-external-link-line" style="font-size:10px;vertical-align:middle;"></i> Portfolio
+        </a>
+    </footer>
+
+    <script src="assets/js/dataset.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+
+</html>
